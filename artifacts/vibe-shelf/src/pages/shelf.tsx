@@ -23,7 +23,7 @@ export default function ShelfPage() {
             <Library size={28} />
           </div>
           <div>
-            <h1 className="text-3xl font-serif font-bold text-primary tracking-wide">Vibe Shelf</h1>
+            <h1 className="text-3xl font-serif font-bold text-primary tracking-wide">AishAr Co. Projects - Aug 26</h1>
             <p className="text-sm text-muted-foreground font-sans mt-1">
               A community bookshelf of vibe-coded GitHub projects.
             </p>
