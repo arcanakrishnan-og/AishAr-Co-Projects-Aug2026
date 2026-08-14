@@ -90,6 +90,43 @@ export const GetBookResponse = zod.object({
 
 
 /**
+ * @summary Update a book on the shelf
+ */
+export const UpdateBookParams = zod.object({
+  "id": zod.coerce.number()
+})
+
+
+
+
+
+
+
+export const UpdateBookBody = zod.object({
+  "firstName": zod.string().min(1).optional(),
+  "lastName": zod.string().min(1).optional(),
+  "projectName": zod.string().min(1).optional(),
+  "liveLink": zod.string().optional(),
+  "githubLink": zod.string().min(1).optional(),
+  "email": zod.string().optional(),
+  "description": zod.string().optional()
+})
+
+export const UpdateBookResponse = zod.object({
+  "id": zod.number(),
+  "firstName": zod.string(),
+  "lastName": zod.string(),
+  "projectName": zod.string(),
+  "liveLink": zod.string().nullish(),
+  "githubLink": zod.string(),
+  "email": zod.string().nullish(),
+  "description": zod.string().nullish().describe('Short description of the project'),
+  "spineColor": zod.string().describe('Hex color code for the book spine'),
+  "createdAt": zod.coerce.date()
+})
+
+
+/**
  * @summary Remove a book from the shelf
  */
 export const DeleteBookParams = zod.object({

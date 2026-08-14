@@ -8,6 +8,7 @@
 
 export * from './book';
 export * from './bookInput';
+export * from './bookUpdate';
 export * from './errorResponse';
 export * from './healthStatus';
 export * from './shelfStats';

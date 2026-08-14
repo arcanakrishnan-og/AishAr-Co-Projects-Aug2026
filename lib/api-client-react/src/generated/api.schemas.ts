@@ -43,6 +43,20 @@ export interface BookInput {
   description?: string;
 }
 
+export interface BookUpdate {
+  /** @minLength 1 */
+  firstName?: string;
+  /** @minLength 1 */
+  lastName?: string;
+  /** @minLength 1 */
+  projectName?: string;
+  liveLink?: string;
+  /** @minLength 1 */
+  githubLink?: string;
+  email?: string;
+  description?: string;
+}
+
 export interface ShelfStats {
   totalBooks: number;
   recentBooks: Book[];

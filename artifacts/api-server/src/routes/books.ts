@@ -5,6 +5,9 @@ import {
   CreateBookBody,
   GetBookParams,
   DeleteBookParams,
+  UpdateBookParams,
+  UpdateBookBody,
+  UpdateBookResponse,
   ListBooksResponse,
   CreateBookResponse,
   GetBookResponse,
@@ -69,6 +72,46 @@ router.post("/books", async (req, res): Promise<void> => {
     .returning();
 
   res.status(201).json(CreateBookResponse.parse(book));
+});
+
+// PATCH /books/:id
+router.patch("/books/:id", async (req, res): Promise<void> => {
+  const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
+  const params = UpdateBookParams.safeParse({ id: parseInt(raw, 10) });
+  if (!params.success) {
+    res.status(400).json({ error: params.error.message });
+    return;
+  }
+
+  const parsed = UpdateBookBody.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: parsed.error.message });
+    return;
+  }
+
+  // Build update object — only include defined fields
+  const updates: Record<string, unknown> = {};
+  const d = parsed.data;
+  if (d.firstName !== undefined) updates.firstName = d.firstName;
+  if (d.lastName !== undefined) updates.lastName = d.lastName;
+  if (d.projectName !== undefined) updates.projectName = d.projectName;
+  if (d.githubLink !== undefined) updates.githubLink = d.githubLink;
+  if (d.liveLink !== undefined) updates.liveLink = d.liveLink || null;
+  if (d.email !== undefined) updates.email = d.email || null;
+  if (d.description !== undefined) updates.description = d.description || null;
+
+  const [book] = await db
+    .update(booksTable)
+    .set(updates)
+    .where(eq(booksTable.id, params.data.id))
+    .returning();
+
+  if (!book) {
+    res.status(404).json({ error: "Book not found" });
+    return;
+  }
+
+  res.json(UpdateBookResponse.parse(book));
 });
 
 // GET /books/:id

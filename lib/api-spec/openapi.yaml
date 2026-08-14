@@ -89,6 +89,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateBook
+      tags: [books]
+      summary: Update a book on the shelf
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookUpdate"
+      responses:
+        "200":
+          description: Updated book
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     delete:
       operationId: deleteBook
       tags: [books]
@@ -174,6 +209,28 @@ components:
         - lastName
         - projectName
         - githubLink
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        projectName:
+          type: string
+          minLength: 1
+        liveLink:
+          type: string
+        githubLink:
+          type: string
+          minLength: 1
+        email:
+          type: string
+        description:
+          type: string
+
+    BookUpdate:
+      type: object
       properties:
         firstName:
           type: string

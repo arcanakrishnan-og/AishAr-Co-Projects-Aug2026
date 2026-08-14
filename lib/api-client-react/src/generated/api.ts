@@ -22,6 +22,7 @@ import type {
 import type {
   Book,
   BookInput,
+  BookUpdate,
   ErrorResponse,
   HealthStatus,
   ShelfStats
@@ -356,6 +357,78 @@ export function useGetBook<TData = Awaited<ReturnType<typeof getBook>>, TError =
 
 
 
+
+export const getUpdateBookUrl = (id: number,) => {
+
+
+
+
+  return `/api/books/${id}`
+}
+
+/**
+ * @summary Update a book on the shelf
+ */
+export const updateBook = async (id: number,
+    bookUpdate: BookUpdate, options?: Parameters<typeof customFetch>[1]): Promise<Book> => {
+
+  return customFetch<Book>(getUpdateBookUrl(id),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(bookUpdate)
+  }
+);}
+
+
+
+
+
+export const getUpdateBookMutationOptions = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateBook>>, TError,{id: number;data: BodyType<BookUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof updateBook>>, TError,{id: number;data: BodyType<BookUpdate>}, TContext> => {
+
+const mutationKey = ['updateBook'];
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateBook>>, {id: number;data: BodyType<BookUpdate>}> = (props) => {
+          const {id,data} = props ?? {};
+
+          return  updateBook(id,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UpdateBookMutationResult = NonNullable<Awaited<ReturnType<typeof updateBook>>>
+    export type UpdateBookMutationBody = BodyType<BookUpdate>
+    export type UpdateBookMutationError = ErrorType<ErrorResponse>
+
+    /**
+ * @summary Update a book on the shelf
+ */
+export const useUpdateBook = <TError = ErrorType<ErrorResponse>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateBook>>, TError,{id: number;data: BodyType<BookUpdate>}, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof updateBook>>,
+        TError,
+        {id: number;data: BodyType<BookUpdate>},
+        TContext
+      > => {
+      return useMutation(getUpdateBookMutationOptions(options));
+    }
 
 export const getDeleteBookUrl = (id: number,) => {
 
