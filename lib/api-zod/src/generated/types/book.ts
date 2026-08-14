@@ -28,5 +28,7 @@ export interface Book {
      * @nullable
      */
   week?: number | null;
+  /** AI Builder of the Week badge */
+  isBadged?: boolean;
   createdAt: Date;
 }

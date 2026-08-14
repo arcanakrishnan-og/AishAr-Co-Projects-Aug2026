@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,9 +12,10 @@ import { useUpdateBook, getListBooksQueryKey, getGetBookQueryKey, getGetShelfSta
 import type { Book } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { Pencil, Loader2 } from "lucide-react";
+import { Pencil, Loader2, Lock, Crown } from "lucide-react";
 
 const WEEKS = [1, 2, 3, 4, 5, 6] as const;
+const BADGE_CODE = "Goldcrown";
 
 const editBookSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -24,6 +26,7 @@ const editBookSchema = z.object({
   email: z.union([z.string().email("Must be a valid email"), z.literal(""), z.undefined()]),
   description: z.union([z.string(), z.literal(""), z.undefined()]),
   week: z.union([z.number().min(1).max(6), z.undefined()]),
+  isBadged: z.boolean().default(false),
 });
 
 type EditBookValues = z.infer<typeof editBookSchema>;
@@ -38,6 +41,9 @@ export function EditBookModal({ book, isOpen, onClose }: EditBookModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const updateBook = useUpdateBook();
+  const [secretCode, setSecretCode] = useState("");
+
+  const codeUnlocked = secretCode === BADGE_CODE;
 
   const form = useForm<EditBookValues>({
     resolver: zodResolver(editBookSchema),
@@ -50,6 +56,7 @@ export function EditBookModal({ book, isOpen, onClose }: EditBookModalProps) {
       email: book.email ?? "",
       description: book.description ?? "",
       week: book.week ?? undefined,
+      isBadged: book.isBadged ?? false,
     },
   });
 
@@ -60,6 +67,8 @@ export function EditBookModal({ book, isOpen, onClose }: EditBookModalProps) {
       email: data.email || undefined,
       description: data.description || undefined,
       week: data.week ?? undefined,
+      // Only allow badge changes when code is unlocked
+      isBadged: codeUnlocked ? data.isBadged : book.isBadged,
     };
 
     updateBook.mutate(
@@ -87,7 +96,7 @@ export function EditBookModal({ book, isOpen, onClose }: EditBookModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) onClose(); }}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { setSecretCode(""); onClose(); } }}>
       <DialogContent className="sm:max-w-[500px] parchment-texture border-amber-900/20 shadow-2xl bg-card text-card-foreground max-h-[92vh] flex flex-col overflow-hidden">
         <DialogHeader className="mb-4">
           <div className="mx-auto w-12 h-12 bg-amber-900/10 rounded-full flex items-center justify-center mb-4 text-amber-900">
@@ -233,7 +242,71 @@ export function EditBookModal({ book, isOpen, onClose }: EditBookModalProps) {
               )}
             />
 
-            <div className="pt-4 flex gap-3">
+            {/* Badge section — gated by secret code */}
+            <div className="border border-amber-900/20 rounded-md p-3 bg-amber-900/5 space-y-3">
+              <div className="flex items-center gap-2 text-amber-900/70 text-xs font-sans uppercase tracking-wider">
+                <Lock size={12} />
+                <span>Special Recognition</span>
+              </div>
+
+              {/* Show current badge status if already badged */}
+              {book.isBadged && !codeUnlocked && (
+                <div className="flex items-center gap-2 text-amber-700 text-sm font-sans bg-amber-100/60 rounded px-3 py-2">
+                  <span className="text-base">👑</span>
+                  <span>AI Builder of the Week badge is active. Enter code to change.</span>
+                </div>
+              )}
+
+              <div className="flex items-center gap-2">
+                <Input
+                  value={secretCode}
+                  onChange={(e) => setSecretCode(e.target.value)}
+                  placeholder="Enter code to unlock badge..."
+                  className={`bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50 text-sm flex-1 ${
+                    codeUnlocked ? "border-amber-500 ring-1 ring-amber-400" : ""
+                  }`}
+                  autoComplete="off"
+                />
+                {codeUnlocked && <span className="text-amber-500 text-lg">👑</span>}
+              </div>
+
+              {codeUnlocked && (
+                <FormField
+                  control={form.control}
+                  name="isBadged"
+                  render={({ field }) => (
+                    <FormItem>
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(!field.value)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-md border-2 transition-all font-sans text-sm ${
+                          field.value
+                            ? "border-amber-500 bg-amber-50 text-amber-900"
+                            : "border-amber-900/20 bg-white/30 text-amber-900/60"
+                        }`}
+                      >
+                        <Crown
+                          size={18}
+                          className={field.value ? "text-amber-500" : "text-amber-900/30"}
+                          fill={field.value ? "currentColor" : "none"}
+                        />
+                        <div className="text-left flex-1">
+                          <div className="font-semibold">AI Builder of the Week</div>
+                          <div className="text-xs opacity-70">Displays a golden crown on the book spine</div>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                          field.value ? "border-amber-500 bg-amber-500" : "border-amber-900/30"
+                        }`}>
+                          {field.value && <div className="w-2 h-2 rounded-full bg-white" />}
+                        </div>
+                      </button>
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+
+            <div className="pt-2 flex gap-3">
               <Button
                 type="button"
                 variant="outline"

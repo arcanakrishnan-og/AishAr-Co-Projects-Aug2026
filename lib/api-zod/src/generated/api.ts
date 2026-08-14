@@ -31,6 +31,7 @@ export const ListBooksResponseItem = zod.object({
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "week": zod.number().nullish().describe('Week number (1-6)'),
+  "isBadged": zod.boolean().optional().describe('AI Builder of the Week badge'),
   "createdAt": zod.coerce.date()
 })
 export const ListBooksResponse = zod.array(ListBooksResponseItem)
@@ -55,7 +56,8 @@ export const CreateBookBody = zod.object({
   "githubLink": zod.string().min(1),
   "email": zod.string().optional(),
   "description": zod.string().optional(),
-  "week": zod.number().min(1).max(createBookBodyWeekMax).optional()
+  "week": zod.number().min(1).max(createBookBodyWeekMax).optional(),
+  "isBadged": zod.boolean().optional()
 })
 
 export const CreateBookResponse = zod.object({
@@ -69,6 +71,7 @@ export const CreateBookResponse = zod.object({
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "week": zod.number().nullish().describe('Week number (1-6)'),
+  "isBadged": zod.boolean().optional().describe('AI Builder of the Week badge'),
   "createdAt": zod.coerce.date()
 })
 
@@ -91,6 +94,7 @@ export const GetBookResponse = zod.object({
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "week": zod.number().nullish().describe('Week number (1-6)'),
+  "isBadged": zod.boolean().optional().describe('AI Builder of the Week badge'),
   "createdAt": zod.coerce.date()
 })
 
@@ -118,7 +122,8 @@ export const UpdateBookBody = zod.object({
   "githubLink": zod.string().min(1).optional(),
   "email": zod.string().optional(),
   "description": zod.string().optional(),
-  "week": zod.number().min(1).max(updateBookBodyWeekMax).optional()
+  "week": zod.number().min(1).max(updateBookBodyWeekMax).optional(),
+  "isBadged": zod.boolean().optional()
 })
 
 export const UpdateBookResponse = zod.object({
@@ -132,6 +137,7 @@ export const UpdateBookResponse = zod.object({
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "week": zod.number().nullish().describe('Week number (1-6)'),
+  "isBadged": zod.boolean().optional().describe('AI Builder of the Week badge'),
   "createdAt": zod.coerce.date()
 })
 
@@ -162,6 +168,7 @@ export const GetShelfStatsResponse = zod.object({
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "week": zod.number().nullish().describe('Week number (1-6)'),
+  "isBadged": zod.boolean().optional().describe('AI Builder of the Week badge'),
   "createdAt": zod.coerce.date()
 }))
 })

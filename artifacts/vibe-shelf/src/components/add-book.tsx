@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -11,9 +12,10 @@ import { useCreateBook } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getListBooksQueryKey, getGetShelfStatsQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { LibraryBig, Loader2 } from "lucide-react";
+import { LibraryBig, Loader2, Lock, Crown } from "lucide-react";
 
 const WEEKS = [1, 2, 3, 4, 5, 6] as const;
+const BADGE_CODE = "Goldcrown";
 
 const addBookSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -24,6 +26,7 @@ const addBookSchema = z.object({
   liveLink: z.union([z.string().url("Must be a valid URL"), z.literal(""), z.undefined()]),
   email: z.union([z.string().email("Must be a valid email"), z.literal(""), z.undefined()]),
   week: z.union([z.number().min(1).max(6), z.undefined()]),
+  isBadged: z.boolean().default(false),
 });
 
 type AddBookValues = z.infer<typeof addBookSchema>;
@@ -37,6 +40,9 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const createBook = useCreateBook();
+  const [secretCode, setSecretCode] = useState("");
+
+  const codeUnlocked = secretCode === BADGE_CODE;
 
   const form = useForm<AddBookValues>({
     resolver: zodResolver(addBookSchema),
@@ -49,17 +55,20 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
       liveLink: "",
       email: "",
       week: undefined,
+      isBadged: false,
     },
   });
 
+  const isBadged = form.watch("isBadged");
+
   const onSubmit = (data: AddBookValues) => {
-    // Convert empty strings to undefined to match API optional fields
     const payload = {
       ...data,
       description: data.description || undefined,
       liveLink: data.liveLink || undefined,
       email: data.email || undefined,
       week: data.week ?? undefined,
+      isBadged: codeUnlocked ? data.isBadged : false,
     };
 
     createBook.mutate(
@@ -73,6 +82,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
             description: "Your project has been successfully added to the library.",
           });
           form.reset();
+          setSecretCode("");
           onClose();
         },
         onError: () => {
@@ -90,6 +100,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
     <Dialog open={isOpen} onOpenChange={(open) => {
       if (!open) {
         form.reset();
+        setSecretCode("");
         onClose();
       }
     }}>
@@ -233,9 +244,67 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
               )}
             />
 
-            <div className="pt-4">
-              <Button 
-                type="submit" 
+            {/* Badge section — gated by secret code */}
+            <div className="border border-amber-900/20 rounded-md p-3 bg-amber-900/5 space-y-3">
+              <div className="flex items-center gap-2 text-amber-900/70 text-xs font-sans uppercase tracking-wider">
+                <Lock size={12} />
+                <span>Special Recognition</span>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Input
+                  value={secretCode}
+                  onChange={(e) => setSecretCode(e.target.value)}
+                  placeholder="Enter code to unlock..."
+                  className={`bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50 text-sm flex-1 ${
+                    codeUnlocked ? "border-amber-500 ring-1 ring-amber-400" : ""
+                  }`}
+                  autoComplete="off"
+                />
+                {codeUnlocked && (
+                  <span className="text-amber-500 text-lg">👑</span>
+                )}
+              </div>
+
+              {codeUnlocked && (
+                <FormField
+                  control={form.control}
+                  name="isBadged"
+                  render={({ field }) => (
+                    <FormItem>
+                      <button
+                        type="button"
+                        onClick={() => field.onChange(!field.value)}
+                        className={`w-full flex items-center gap-3 p-3 rounded-md border-2 transition-all font-sans text-sm ${
+                          field.value
+                            ? "border-amber-500 bg-amber-50 text-amber-900"
+                            : "border-amber-900/20 bg-white/30 text-amber-900/60"
+                        }`}
+                      >
+                        <Crown
+                          size={18}
+                          className={field.value ? "text-amber-500" : "text-amber-900/30"}
+                          fill={field.value ? "currentColor" : "none"}
+                        />
+                        <div className="text-left flex-1">
+                          <div className="font-semibold">AI Builder of the Week</div>
+                          <div className="text-xs opacity-70">Displays a golden crown on the book spine</div>
+                        </div>
+                        <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center shrink-0 ${
+                          field.value ? "border-amber-500 bg-amber-500" : "border-amber-900/30"
+                        }`}>
+                          {field.value && <div className="w-2 h-2 rounded-full bg-white" />}
+                        </div>
+                      </button>
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+
+            <div className="pt-2">
+              <Button
+                type="submit"
                 className="w-full font-serif text-lg tracking-wide bg-amber-800 hover:bg-amber-900 text-white"
                 disabled={createBook.isPending}
               >

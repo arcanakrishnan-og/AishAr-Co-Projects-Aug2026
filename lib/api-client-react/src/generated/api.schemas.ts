@@ -31,6 +31,8 @@ export interface Book {
      * @nullable
      */
   week?: number | null;
+  /** AI Builder of the Week badge */
+  isBadged?: boolean;
   createdAt: string;
 }
 
@@ -51,6 +53,7 @@ export interface BookInput {
      * @maximum 6
      */
   week?: number;
+  isBadged?: boolean;
 }
 
 export interface BookUpdate {
@@ -70,6 +73,7 @@ export interface BookUpdate {
      * @maximum 6
      */
   week?: number;
+  isBadged?: boolean;
 }
 
 export interface ShelfStats {

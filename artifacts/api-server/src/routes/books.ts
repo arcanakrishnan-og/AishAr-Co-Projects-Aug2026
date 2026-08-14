@@ -54,7 +54,7 @@ router.post("/books", async (req, res): Promise<void> => {
     return;
   }
 
-  const { firstName, lastName, projectName, liveLink, githubLink, email, description, week } =
+  const { firstName, lastName, projectName, liveLink, githubLink, email, description, week, isBadged } =
     parsed.data;
 
   const [book] = await db
@@ -68,6 +68,7 @@ router.post("/books", async (req, res): Promise<void> => {
       email: email ?? null,
       description: description ?? null,
       week: week ?? null,
+      isBadged: isBadged ?? false,
       spineColor: randomSpineColor(),
     })
     .returning();
@@ -101,6 +102,7 @@ router.patch("/books/:id", async (req, res): Promise<void> => {
   if (d.email !== undefined) updates.email = d.email || null;
   if (d.description !== undefined) updates.description = d.description || null;
   if (d.week !== undefined) updates.week = d.week ?? null;
+  if (d.isBadged !== undefined) updates.isBadged = d.isBadged;
 
   const [book] = await db
     .update(booksTable)
