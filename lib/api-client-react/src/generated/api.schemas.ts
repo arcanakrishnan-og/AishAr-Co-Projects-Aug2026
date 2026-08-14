@@ -53,7 +53,6 @@ export interface BookInput {
      * @maximum 6
      */
   week?: number;
-  isBadged?: boolean;
 }
 
 export interface BookUpdate {
@@ -73,7 +72,6 @@ export interface BookUpdate {
      * @maximum 6
      */
   week?: number;
-  isBadged?: boolean;
 }
 
 export interface ShelfStats {

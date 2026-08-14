@@ -13,6 +13,7 @@ import {
   GetBookResponse,
   GetShelfStatsResponse,
 } from "@workspace/api-zod";
+import { adminAuth } from "../middlewares/adminAuth";
 
 const router: IRouter = Router();
 
@@ -54,7 +55,7 @@ router.post("/books", async (req, res): Promise<void> => {
     return;
   }
 
-  const { firstName, lastName, projectName, liveLink, githubLink, email, description, week, isBadged } =
+  const { firstName, lastName, projectName, liveLink, githubLink, email, description, week } =
     parsed.data;
 
   const [book] = await db
@@ -68,7 +69,7 @@ router.post("/books", async (req, res): Promise<void> => {
       email: email ?? null,
       description: description ?? null,
       week: week ?? null,
-      isBadged: isBadged ?? false,
+      isBadged: false,
       spineColor: randomSpineColor(),
     })
     .returning();
@@ -76,8 +77,8 @@ router.post("/books", async (req, res): Promise<void> => {
   res.status(201).json(CreateBookResponse.parse(book));
 });
 
-// PATCH /books/:id
-router.patch("/books/:id", async (req, res): Promise<void> => {
+// PATCH /books/:id — admin only
+router.patch("/books/:id", adminAuth, async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = UpdateBookParams.safeParse({ id: parseInt(raw, 10) });
   if (!params.success) {
@@ -104,7 +105,7 @@ router.patch("/books/:id", async (req, res): Promise<void> => {
   if (d.email !== undefined) updates.email = d.email || null;
   if (d.description !== undefined) updates.description = d.description || null;
   if (d.week !== undefined) updates.week = d.week ?? null;
-  if (d.isBadged !== undefined) updates.isBadged = d.isBadged;
+  // isBadged is intentionally excluded — it cannot be set via the public API
 
   const [book] = await db
     .update(booksTable)
@@ -142,8 +143,8 @@ router.get("/books/:id", async (req, res): Promise<void> => {
   res.json(GetBookResponse.parse(book));
 });
 
-// DELETE /books/:id
-router.delete("/books/:id", async (req, res): Promise<void> => {
+// DELETE /books/:id — admin only
+router.delete("/books/:id", adminAuth, async (req, res): Promise<void> => {
   const raw = Array.isArray(req.params.id) ? req.params.id[0] : req.params.id;
   const params = DeleteBookParams.safeParse({ id: parseInt(raw, 10) });
   if (!params.success) {

@@ -56,8 +56,7 @@ export const CreateBookBody = zod.object({
   "githubLink": zod.string().min(1),
   "email": zod.string().optional(),
   "description": zod.string().optional(),
-  "week": zod.number().min(1).max(createBookBodyWeekMax).optional(),
-  "isBadged": zod.boolean().optional()
+  "week": zod.number().min(1).max(createBookBodyWeekMax).optional()
 })
 
 export const CreateBookResponse = zod.object({
@@ -122,8 +121,7 @@ export const UpdateBookBody = zod.object({
   "githubLink": zod.string().min(1).optional(),
   "email": zod.string().optional(),
   "description": zod.string().optional(),
-  "week": zod.number().min(1).max(updateBookBodyWeekMax).optional(),
-  "isBadged": zod.boolean().optional()
+  "week": zod.number().min(1).max(updateBookBodyWeekMax).optional()
 })
 
 export const UpdateBookResponse = zod.object({
