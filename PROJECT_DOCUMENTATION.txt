@@ -1,0 +1,335 @@
+================================================================================
+  AISHAR CO. PROJECTS — AUG 26
+  Project Documentation
+================================================================================
+
+  A vibe-coded community bookshelf for showcasing GitHub projects,
+  built during the AishAr cohort, August 2026.
+
+================================================================================
+  1. PROJECT OVERVIEW
+================================================================================
+
+What is it?
+-----------
+AishAr Co. Projects - Aug 26 is a digital library shelf where cohort members
+can register their vibe-coded GitHub projects as vintage-style book spines.
+Each project becomes a "book" on a shared, publicly visible shelf. Anyone can
+browse the shelf, click a book to read its details, and add their own entry.
+
+Core Purpose
+------------
+- Give cohort members a visual, memorable way to showcase what they built
+- Make it easy for the group to discover each other's projects at a glance
+- Provide a lightweight submission form that captures just enough metadata
+  (name, project name, GitHub link, live URL, email, week, description)
+
+What it looks like
+------------------
+The UI is styled as a warm, vintage library: walnut wood-grain shelf rows,
+aged parchment detail cards, amber and serif typography, and hand-picked
+vintage spine colors (saddle brown, midnight navy, burgundy, hunter green, etc.).
+Each book spine displays a pixel-art Mario character at the top and the project
+name rotated vertically along the spine. Below a gold decorative ribbon the
+cohort week is shown (e.g. "Wk 3"). Clicking a spine animates it pulling off
+the shelf and opens a parchment-style detail card.
+
+Who can use it?
+---------------
+The shelf is open — any cohort member can add their book, edit it, or remove
+it. No authentication is required.
+
+================================================================================
+  2. TECH STACK
+================================================================================
+
+Runtime & Tooling
+-----------------
+- Node.js 24, TypeScript 5.9
+- pnpm workspaces (monorepo with shared libraries)
+
+Frontend
+--------
+- React 19 + Vite 7
+- Tailwind CSS (warm amber/parchment design system)
+- Framer Motion (book hover/lift animation)
+- React Hook Form + Zod (form validation)
+- TanStack Query (server state, caching, invalidation)
+- shadcn/ui component library (Dialog, Select, Input, Button, etc.)
+
+Backend
+-------
+- Express 5 (REST API, served at /api)
+- Drizzle ORM (type-safe query builder)
+- PostgreSQL (Replit-managed database)
+- Pino (structured JSON logging)
+- esbuild (production bundle)
+
+API Contract Layer (shared libs)
+---------------------------------
+- OpenAPI 3.1 spec (`lib/api-spec/openapi.yaml`) — single source of truth
+- Orval — code-generates React Query hooks from the spec
+- drizzle-zod — auto-generates Zod schemas from the DB table definition
+
+================================================================================
+  3. DATA MODEL
+================================================================================
+
+Table: books
+------------
+  id           serial PRIMARY KEY
+  first_name   text   NOT NULL
+  last_name    text   NOT NULL
+  project_name text   NOT NULL
+  github_link  text   NOT NULL
+  live_link    text   (nullable)
+  email        text   (nullable — for collaboration contact)
+  description  text   (nullable — short project blurb)
+  week         integer (nullable — cohort week 1–6)
+  spine_color  text   NOT NULL (assigned randomly from vintage palette)
+  created_at   timestamptz NOT NULL DEFAULT now()
+
+Spine Color Palette (15 curated vintage shades)
+------------------------------------------------
+  Saddle brown, Dark sienna, Dark forest green, Midnight navy, Rich walnut,
+  Burgundy, Hunter green, Espresso, Warm taupe, Slate blue, Deep plum,
+  Olive green, Terracotta, Dusty blue, Golden brown
+
+No external datasets or third-party data sources were used. All data is
+user-generated and stored in a Replit PostgreSQL database.
+
+================================================================================
+  4. FEATURES BUILT
+================================================================================
+
+Shelf View
+----------
+- Grid of book spines, auto-filling available width
+- Each spine: pixel-art character (8 variants, assigned by book ID mod 8),
+  project name rotated vertically, gold decorative ribbon bands, week label
+- Shelf row illusion via CSS repeating-gradient background
+- Book hover animates upward (Framer Motion whileHover)
+
+Add Book
+--------
+- Modal form: first name, last name, project name, description (optional),
+  week (Week 1–6 dropdown), GitHub URL, live URL (optional), email (optional)
+- Spine color assigned randomly server-side on submission
+- Optimistic cache invalidation via TanStack Query
+
+Edit Book
+---------
+- Pencil icon inside the detail card opens an identical pre-filled edit form
+- PATCH endpoint updates only supplied fields (partial update)
+
+Delete Book
+-----------
+- Trash icon inside the detail card, with a confirmation dialog
+
+Find / Search
+-------------
+- Magnifying glass button in header toggles a slide-down search bar
+- Real-time client-side filtering across project name, first name,
+  last name, and description
+- Keyboard shortcut: Escape closes the bar
+- Result count shown while typing
+
+Week Filter
+-----------
+- Pill buttons (All / Week 1 – Week 6) beneath the header
+- Horizontally scrollable on mobile so all pills stay on one row
+- Works in combination with the text search (AND logic)
+
+Book Detail Card
+----------------
+- Parchment-styled modal showing project name, author, description,
+  GitHub link, live link, email contact, and submission date
+- Top color stripe matches the book's spine color
+
+Mobile Responsiveness
+---------------------
+- Header: title scales down on mobile; Find and Add buttons collapse to
+  icon-only on small screens
+- Week filter: single-row horizontal scroll (no wrapping)
+- All modals: max-height 90–92 vh with inner scroll so forms don't clip
+- Shelf grid: uses CSS auto-fill so books reflow naturally at any width
+
+================================================================================
+  5. PROMPTS USED DURING VIBE CODING
+================================================================================
+
+The following are the actual prompts submitted during the build session,
+in order. Each drove a specific feature or design iteration.
+
+  P01: "Either make the icons smaller or the font size of project name
+        smaller, since they are overlapping"
+
+  P02: "Remove author initials, move the icons to above the top gold bars
+        so that project name gets enough space"
+
+  P03: "Change 'Vibe-Shelf' to AishAr Co. Projects - Aug 26"
+
+  P04: "Add the capability to edit entries 'books'"
+
+  P05: "Add a 'Find' window for users to find certain books"
+
+  P06: "In the entry form, add a week 1 to week 6 drop down option and
+        in the book shelf display the week below golden ribbon instead
+        of the year"
+
+  P07: "Change the website title that shows up in the tab from VibeShelf
+        to AishAr Co. Projects - Aug 26"
+
+  P08: "Add a week filter"
+
+  P09: "Make this website mobile friendly"
+
+  P10: "Create a project documentation txt file. it should include the
+        following: what is the project built. Include: project overview,
+        datasets used, prompts used during vibe coding, iterations tried,
+        and any learnings or observations from the workflow."
+
+Note: Before the above prompts, the core scaffold (bookshelf UI, add-book
+form, API, database, spine color system, pixel-art characters, shelf stats)
+was generated by the Replit Agent as the initial build.
+
+================================================================================
+  6. ITERATIONS TRIED
+================================================================================
+
+Iteration 1 — Book Spine Layout (Initials + Year placement)
+------------------------------------------------------------
+  Initial state: Year displayed above the bottom gold bars; author initials
+  displayed below the pixel-art character (between character and project name).
+  Problem: Text felt cramped and order was visually confusing.
+  Change: Moved initials above the top gold bar; moved year below the
+  bottom gold bar — framing the spine with metadata at the extremes.
+
+Iteration 2 — Icon vs. Text Sizing (Overlap Fix)
+-------------------------------------------------
+  Problem: Pixel-art character and rotated project name overlapped on narrow
+  spines, making both unreadable.
+  First attempt: Reduce pixel size from 4px/pixel to 3px/pixel (30×42px
+  instead of 40×56px). This gave the project name enough room to breathe
+  without sacrificing the recognisability of the character.
+  Outcome: Sufficient — kept this change.
+
+Iteration 3 — Initials Removal + Character Position
+----------------------------------------------------
+  Problem: Even with smaller icons, the initials between the character and
+  the project name still ate into vertical space.
+  Decision: Remove initials entirely. Move character above the top gold bar
+  so the entire spine body is available for the project name.
+  Outcome: Clean, uncluttered — project names now fully visible.
+
+Iteration 4 — Year → Week
+--------------------------
+  Initial state: Year (e.g. "2026") shown below the bottom gold bar —
+  not particularly informative in a cohort context.
+  Change: Replaced year with cohort week (e.g. "Wk 3"), pulled from a new
+  Week 1–6 dropdown in the entry form. Required: DB migration (new integer
+  column), OpenAPI spec update, codegen re-run, backend route update, and
+  form UI update. Existing books with no week set show "—".
+
+Iteration 5 — Branding Pass
+----------------------------
+  Changed all instances of "Vibe Shelf" (header H1, browser tab <title>,
+  OG meta tags, Twitter meta tags) to "AishAr Co. Projects - Aug 26".
+
+Iteration 6 — Edit Capability
+------------------------------
+  Added full PATCH support: OpenAPI spec → codegen → Express route → modal
+  form pre-filled with existing values. Edit is accessed via a pencil icon
+  inside the book detail card.
+
+Iteration 7 — Find Panel
+-------------------------
+  Slide-down search bar triggered by a Find button in the header.
+  Client-side filtering (no extra API calls) across project name, first name,
+  last name, and description. Closes on Escape. Result count shown inline.
+
+Iteration 8 — Week Filter Bar
+------------------------------
+  Pill-button row (All, Week 1–6) added below the header. Filters combine
+  with the text search using AND logic. Horizontally scrollable on mobile.
+
+Iteration 9 — Mobile Responsiveness
+-------------------------------------
+  Several elements were not mobile-ready:
+  - Header title ("AishAr Co. Projects - Aug 26") was too long for small
+    screens — solved with responsive font scaling (text-base → text-3xl).
+  - Header buttons took too much space — collapsed to icon-only on mobile.
+  - Week filter wrapped awkwardly — changed to horizontal scroll.
+  - Modals clipped off-screen on short viewports — added max-height + inner
+    scroll to all three modals (book details, add book, edit book).
+
+================================================================================
+  7. LEARNINGS AND OBSERVATIONS FROM THE WORKFLOW
+================================================================================
+
+1. Prompt specificity drives precision
+   ------------------------------------
+   Vague prompts ("make it look better") produced less targeted changes than
+   specific ones ("remove author initials, move icons above the top gold bars").
+   The more precisely a prompt described the visual or functional outcome, the
+   closer the first result was to the intent — reducing back-and-forth rounds.
+
+2. Layout issues surface in sequence
+   ------------------------------------
+   Spacing problems on the book spine were not all visible at once. Fixing the
+   icon/text overlap (Iteration 2) revealed that initials were still consuming
+   space (Iteration 3). Mobile layout issues only fully surfaced after the
+   desktop layout was stable (Iteration 9). Designing narrow first may have
+   surfaced these sooner.
+
+3. Database changes cascade through the stack
+   ---------------------------------------------
+   Adding the "week" field touched six separate layers: DB schema, migration,
+   OpenAPI spec, codegen, backend route handler, and two frontend forms. In a
+   vibe-coding workflow this cascade is fast but easy to miss a layer — the
+   codegen step (re-generating React Query hooks and Zod schemas from the spec)
+   is the most commonly forgotten and causes cryptic TypeScript errors if skipped.
+
+4. Client-side filtering is fast to ship, costly to scale
+   ---------------------------------------------------------
+   Both Find and the Week filter operate entirely on the already-loaded book
+   list (no extra API calls). This was the right call for a cohort-sized
+   dataset (likely < 200 entries). For a larger dataset, server-side search
+   with query parameters would be necessary to avoid loading everything
+   on page load.
+
+5. Mobile responsiveness as an afterthought adds friction
+   ---------------------------------------------------------
+   Retrofitting mobile support (Iteration 9) required touching the header,
+   filter bar, and all three modals — work that would have been simpler if
+   mobile breakpoints had been considered from the first layout pass.
+   Starting with a mobile-first grid and `min-width` breakpoints tends to
+   be less rework than top-down desktop-first design.
+
+6. Pixel art characters add delight at low cost
+   ------------------------------------------------
+   The 8 Mario-style pixel-art characters (rendered entirely with CSS
+   box-shadow grids — no image assets) were part of the initial scaffold.
+   They dramatically increase the visual memorability of each book spine
+   and give the shelf personality, at zero asset load cost. A lightweight
+   technique worth reusing in future cohort tools.
+
+7. Random spine color assignment works surprisingly well
+   -------------------------------------------------------
+   Assigning a vintage spine color randomly from a curated 15-color palette
+   at submission time (rather than letting the user pick) consistently
+   produces a visually coherent shelf without any user decision overhead.
+   The curated palette does the heavy lifting — all 15 colors harmonise
+   together because they were selected as a set.
+
+8. Vibe coding accelerates UI exploration but needs human curation
+   -----------------------------------------------------------------
+   Moving fast through layout iterations (icon size, initials, position)
+   produced working options quickly. However, the judgement call of which
+   iteration was visually correct — and when to stop iterating — still
+   required human aesthetic review. The workflow is best thought of as
+   "generate → review → refine" rather than "generate → ship".
+
+================================================================================
+  END OF DOCUMENTATION
+================================================================================
