@@ -209,14 +209,21 @@ export function BookSpine({ book, onClick }: BookSpineProps) {
       {/* Details/Decorations */}
       <div className="w-full flex-1 flex flex-col items-center justify-between z-10 text-white/90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
         
-        {/* Top decorations & Character & Initials */}
-        <div className="flex flex-col items-center gap-3 w-full">
+        {/* Top: Initials above gold bars, then character */}
+        <div className="flex flex-col items-center gap-1 w-full">
+          {/* Initials above the gold bars */}
+          <div className="font-serif text-xs leading-none font-bold tracking-widest flex flex-col items-center opacity-90 mb-1">
+            <span>{firstInitial}</span>
+            <span>{lastInitial}</span>
+          </div>
+
           {/* Gold bars */}
           <div className="w-full flex flex-col gap-[2px]">
             <div className="h-[2px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
             <div className="h-[4px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
           </div>
-          
+
+          {/* Mario character below gold bars */}
           <div 
             className="w-[40px] h-[56px] relative mt-2"
             style={{ imageRendering: "pixelated" }}
@@ -225,11 +232,6 @@ export function BookSpine({ book, onClick }: BookSpineProps) {
               className="absolute top-0 left-0 w-[4px] h-[4px]"
               style={{ boxShadow: getPixelArt(book.id % 8) }}
             />
-          </div>
-
-          <div className="font-serif text-xs leading-none font-bold tracking-widest flex flex-col items-center opacity-80 mt-1">
-            <span>{firstInitial}</span>
-            <span>{lastInitial}</span>
           </div>
         </div>
 
@@ -246,13 +248,13 @@ export function BookSpine({ book, onClick }: BookSpineProps) {
         </div>
 
         {/* Bottom decorations */}
-        <div className="w-full flex flex-col items-center gap-2 mb-2">
-          <div className="text-[10px] font-sans opacity-70">
-            {new Date(book.createdAt).getFullYear()}
-          </div>
+        <div className="w-full flex flex-col items-center gap-1 mb-2">
           <div className="w-full flex flex-col gap-[2px]">
             <div className="h-[4px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
             <div className="h-[2px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
+          </div>
+          <div className="text-[10px] font-sans opacity-70 mt-1">
+            {new Date(book.createdAt).getFullYear()}
           </div>
         </div>
       </div>
