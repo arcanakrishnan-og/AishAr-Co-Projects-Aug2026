@@ -165,7 +165,7 @@ const getPixelArt = (type: number) => {
     for (let c = 0; c < 10; c++) {
       const char = layout[r]?.[c] || ' ';
       if (char !== ' ' && colors[char]) {
-        shadows.push(`${c * 4}px ${r * 4}px 0 ${colors[char]}`);
+        shadows.push(`${c * 3}px ${r * 3}px 0 ${colors[char]}`);
       }
     }
   }
@@ -225,11 +225,11 @@ export function BookSpine({ book, onClick }: BookSpineProps) {
 
           {/* Mario character below gold bars */}
           <div 
-            className="w-[40px] h-[56px] relative mt-2"
+            className="w-[30px] h-[42px] relative mt-2"
             style={{ imageRendering: "pixelated" }}
           >
             <div 
-              className="absolute top-0 left-0 w-[4px] h-[4px]"
+              className="absolute top-0 left-0 w-[3px] h-[3px]"
               style={{ boxShadow: getPixelArt(book.id % 8) }}
             />
           </div>
