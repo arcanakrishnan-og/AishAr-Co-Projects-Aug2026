@@ -121,7 +121,8 @@ export const UpdateBookBody = zod.object({
   "githubLink": zod.string().min(1).optional(),
   "email": zod.string().optional(),
   "description": zod.string().optional(),
-  "week": zod.number().min(1).max(updateBookBodyWeekMax).optional()
+  "week": zod.number().min(1).max(updateBookBodyWeekMax).optional(),
+  "isBadged": zod.boolean().optional()
 })
 
 export const UpdateBookResponse = zod.object({

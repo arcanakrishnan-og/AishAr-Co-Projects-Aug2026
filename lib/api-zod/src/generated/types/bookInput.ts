@@ -23,5 +23,4 @@ export interface BookInput {
      * @maximum 6
      */
   week?: number;
-  isBadged?: boolean;
 }

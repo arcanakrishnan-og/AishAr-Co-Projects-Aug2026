@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { db, booksTable, SPINE_COLORS } from "@workspace/db";
 import {
   CreateBookBody,
@@ -104,13 +104,25 @@ router.patch("/books/:id", async (req, res): Promise<void> => {
   if (d.email !== undefined) updates.email = d.email || null;
   if (d.description !== undefined) updates.description = d.description || null;
   if (d.week !== undefined) updates.week = d.week ?? null;
-  if (d.isBadged !== undefined) updates.isBadged = d.isBadged;
 
-  const [book] = await db
-    .update(booksTable)
-    .set(updates)
-    .where(eq(booksTable.id, params.data.id))
-    .returning();
+  // isBadged uses raw SQL because Drizzle's column mapper drops boolean fields
+  // from plain JS objects in this version — bypass it entirely for this field.
+  if (d.isBadged !== undefined) {
+    await db.execute(
+      sql`UPDATE books SET is_badged = ${d.isBadged} WHERE id = ${params.data.id}`
+    );
+  }
+
+  const [book] = Object.keys(updates).length > 0
+    ? await db
+        .update(booksTable)
+        .set(updates)
+        .where(eq(booksTable.id, params.data.id))
+        .returning()
+    : await db
+        .select()
+        .from(booksTable)
+        .where(eq(booksTable.id, params.data.id));
 
   if (!book) {
     res.status(404).json({ error: "Book not found" });

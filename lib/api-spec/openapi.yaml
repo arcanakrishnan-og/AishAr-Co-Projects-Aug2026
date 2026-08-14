@@ -292,6 +292,8 @@ components:
           type: number
           minimum: 1
           maximum: 6
+        isBadged:
+          type: boolean
 
     ShelfStats:
       type: object
