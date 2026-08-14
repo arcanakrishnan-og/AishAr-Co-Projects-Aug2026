@@ -30,6 +30,7 @@ export const ListBooksResponseItem = zod.object({
   "email": zod.string().nullish(),
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
+  "week": zod.number().nullish().describe('Week number (1-6)'),
   "createdAt": zod.coerce.date()
 })
 export const ListBooksResponse = zod.array(ListBooksResponseItem)
@@ -42,6 +43,8 @@ export const ListBooksResponse = zod.array(ListBooksResponseItem)
 
 
 
+export const createBookBodyWeekMax = 6;
+
 
 
 export const CreateBookBody = zod.object({
@@ -51,7 +54,8 @@ export const CreateBookBody = zod.object({
   "liveLink": zod.string().optional(),
   "githubLink": zod.string().min(1),
   "email": zod.string().optional(),
-  "description": zod.string().optional()
+  "description": zod.string().optional(),
+  "week": zod.number().min(1).max(createBookBodyWeekMax).optional()
 })
 
 export const CreateBookResponse = zod.object({
@@ -64,6 +68,7 @@ export const CreateBookResponse = zod.object({
   "email": zod.string().nullish(),
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
+  "week": zod.number().nullish().describe('Week number (1-6)'),
   "createdAt": zod.coerce.date()
 })
 
@@ -85,6 +90,7 @@ export const GetBookResponse = zod.object({
   "email": zod.string().nullish(),
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
+  "week": zod.number().nullish().describe('Week number (1-6)'),
   "createdAt": zod.coerce.date()
 })
 
@@ -100,6 +106,8 @@ export const UpdateBookParams = zod.object({
 
 
 
+export const updateBookBodyWeekMax = 6;
+
 
 
 export const UpdateBookBody = zod.object({
@@ -109,7 +117,8 @@ export const UpdateBookBody = zod.object({
   "liveLink": zod.string().optional(),
   "githubLink": zod.string().min(1).optional(),
   "email": zod.string().optional(),
-  "description": zod.string().optional()
+  "description": zod.string().optional(),
+  "week": zod.number().min(1).max(updateBookBodyWeekMax).optional()
 })
 
 export const UpdateBookResponse = zod.object({
@@ -122,6 +131,7 @@ export const UpdateBookResponse = zod.object({
   "email": zod.string().nullish(),
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
+  "week": zod.number().nullish().describe('Week number (1-6)'),
   "createdAt": zod.coerce.date()
 })
 
@@ -151,6 +161,7 @@ export const GetShelfStatsResponse = zod.object({
   "email": zod.string().nullish(),
   "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
+  "week": zod.number().nullish().describe('Week number (1-6)'),
   "createdAt": zod.coerce.date()
 }))
 })

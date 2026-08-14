@@ -247,8 +247,8 @@ export function BookSpine({ book, onClick }: BookSpineProps) {
             <div className="h-[4px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
             <div className="h-[2px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
           </div>
-          <div className="text-[10px] font-sans opacity-70 mt-1">
-            {new Date(book.createdAt).getFullYear()}
+          <div className="text-[10px] font-sans opacity-70 mt-1 tracking-wide">
+            {book.week != null ? `Wk ${book.week}` : "—"}
           </div>
         </div>
       </div>

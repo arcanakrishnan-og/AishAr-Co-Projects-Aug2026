@@ -6,11 +6,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCreateBook } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 import { getListBooksQueryKey, getGetShelfStatsQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
 import { LibraryBig, Loader2 } from "lucide-react";
+
+const WEEKS = [1, 2, 3, 4, 5, 6] as const;
 
 const addBookSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
@@ -20,6 +23,7 @@ const addBookSchema = z.object({
   githubLink: z.string().url("Must be a valid URL").min(1, "GitHub link is required"),
   liveLink: z.union([z.string().url("Must be a valid URL"), z.literal(""), z.undefined()]),
   email: z.union([z.string().email("Must be a valid email"), z.literal(""), z.undefined()]),
+  week: z.union([z.number().min(1).max(6), z.undefined()]),
 });
 
 type AddBookValues = z.infer<typeof addBookSchema>;
@@ -44,6 +48,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
       githubLink: "",
       liveLink: "",
       email: "",
+      week: undefined,
     },
   });
 
@@ -54,6 +59,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
       description: data.description || undefined,
       liveLink: data.liveLink || undefined,
       email: data.email || undefined,
+      week: data.week ?? undefined,
     };
 
     createBook.mutate(
@@ -154,6 +160,32 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                   <FormControl>
                     <Textarea placeholder="A brief description of this project..." className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50 resize-none h-20" {...field} />
                   </FormControl>
+                  <FormMessage className="text-red-800" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="week"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-amber-950">Week</FormLabel>
+                  <Select
+                    onValueChange={(v) => field.onChange(v ? Number(v) : undefined)}
+                    value={field.value != null ? String(field.value) : ""}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="bg-white/50 border-amber-900/20 focus:ring-amber-900/50">
+                        <SelectValue placeholder="Select a week..." />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {WEEKS.map((w) => (
+                        <SelectItem key={w} value={String(w)}>Week {w}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage className="text-red-800" />
                 </FormItem>
               )}

@@ -23,5 +23,10 @@ export interface Book {
   description?: string | null;
   /** Hex color code for the book spine */
   spineColor: string;
+  /**
+     * Week number (1-6)
+     * @nullable
+     */
+  week?: number | null;
   createdAt: Date;
 }

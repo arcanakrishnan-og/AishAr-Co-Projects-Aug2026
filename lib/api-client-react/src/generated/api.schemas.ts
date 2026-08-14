@@ -26,6 +26,11 @@ export interface Book {
   description?: string | null;
   /** Hex color code for the book spine */
   spineColor: string;
+  /**
+     * Week number (1-6)
+     * @nullable
+     */
+  week?: number | null;
   createdAt: string;
 }
 
@@ -41,6 +46,11 @@ export interface BookInput {
   githubLink: string;
   email?: string;
   description?: string;
+  /**
+     * @minimum 1
+     * @maximum 6
+     */
+  week?: number;
 }
 
 export interface BookUpdate {
@@ -55,6 +65,11 @@ export interface BookUpdate {
   githubLink?: string;
   email?: string;
   description?: string;
+  /**
+     * @minimum 1
+     * @maximum 6
+     */
+  week?: number;
 }
 
 export interface ShelfStats {

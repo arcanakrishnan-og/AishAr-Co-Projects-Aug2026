@@ -18,4 +18,9 @@ export interface BookUpdate {
   githubLink?: string;
   email?: string;
   description?: string;
+  /**
+     * @minimum 1
+     * @maximum 6
+     */
+  week?: number;
 }

@@ -1,4 +1,4 @@
-import { pgTable, text, serial, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, timestamp, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod/v4";
 
@@ -30,6 +30,7 @@ export const booksTable = pgTable("books", {
   githubLink: text("github_link").notNull(),
   email: text("email"),
   description: text("description"),
+  week: integer("week"),
   spineColor: text("spine_color").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
