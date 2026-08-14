@@ -31,8 +31,10 @@ aged parchment detail cards, amber and serif typography, and hand-picked
 vintage spine colors (saddle brown, midnight navy, burgundy, hunter green, etc.).
 Each book spine displays a pixel-art Mario character at the top and the project
 name rotated vertically along the spine. Below a gold decorative ribbon the
-cohort week is shown (e.g. "Wk 3"). Clicking a spine animates it pulling off
-the shelf and opens a parchment-style detail card.
+cohort week is shown (e.g. "Wk 3"). Clicking a spine plays an opening animation
+(the book lifts, pages flash, covers spread) before revealing a parchment-style
+detail card. Books marked as "AI Builder of the Week" display a golden crown 👑
+floating above the spine.
 
 Who can use it?
 ---------------
@@ -52,7 +54,7 @@ Frontend
 --------
 - React 19 + Vite 7
 - Tailwind CSS (warm amber/parchment design system)
-- Framer Motion (book hover/lift animation)
+- Framer Motion (book lift/opening animation via useAnimation controls)
 - React Hook Form + Zod (form validation)
 - TanStack Query (server state, caching, invalidation)
 - shadcn/ui component library (Dialog, Select, Input, Button, etc.)
@@ -86,6 +88,8 @@ Table: books
   email        text   (nullable — for collaboration contact)
   description  text   (nullable — short project blurb)
   week         integer (nullable — cohort week 1–6)
+  is_badged    boolean NOT NULL DEFAULT false
+               (true = AI Builder of the Week; toggled via secret code)
   spine_color  text   NOT NULL (assigned randomly from vintage palette)
   created_at   timestamptz NOT NULL DEFAULT now()
 
@@ -108,18 +112,43 @@ Shelf View
 - Each spine: pixel-art character (8 variants, assigned by book ID mod 8),
   project name rotated vertically, gold decorative ribbon bands, week label
 - Shelf row illusion via CSS repeating-gradient background
-- Book hover animates upward (Framer Motion whileHover)
+- Crown badge 👑 floats above the spine for AI Builder of the Week entries
+
+Book Opening Animation
+----------------------
+- Clicking a spine plays a sequenced Framer Motion animation:
+    1. Book lifts forward off the shelf
+    2. Covers spread open horizontally (scaleX expand)
+    3. Cream parchment pages flash briefly
+    4. Book snaps shut → detail modal opens
+- Hover still produces a smooth upward lift (spring physics)
+- Implemented with useAnimation controls (not the simple whileHover/whileTap
+  declarative API) so the hover and click sequences can be composed
+
+AI Builder of the Week — Crown Badge
+--------------------------------------
+- Any book can be designated "AI Builder of the Week" via a secret code gate
+- In the Add Book or Edit Book form, a "Special Recognition" section appears
+  at the bottom. Entering the correct code reveals a toggle.
+- When enabled, a 👑 golden crown icon with a glow effect is rendered above
+  the pixel-art character on the book spine
+- The badge status (is_badged) is stored in the database and returned by the API
+- SECRET CODE: Goldcrown
+  (Case-sensitive. Share with cohort leads only.)
 
 Add Book
 --------
 - Modal form: first name, last name, project name, description (optional),
   week (Week 1–6 dropdown), GitHub URL, live URL (optional), email (optional)
+- Special Recognition section with secret-code gate for the crown badge
 - Spine color assigned randomly server-side on submission
 - Optimistic cache invalidation via TanStack Query
 
 Edit Book
 ---------
 - Pencil icon inside the detail card opens an identical pre-filled edit form
+- If a book already carries the badge, its status is shown in the form
+- Changing badge status still requires entering the secret code
 - PATCH endpoint updates only supplied fields (partial update)
 
 Delete Book
@@ -188,6 +217,13 @@ in order. Each drove a specific feature or design iteration.
         following: what is the project built. Include: project overview,
         datasets used, prompts used during vibe coding, iterations tried,
         and any learnings or observations from the workflow."
+
+  P11: "I would like to add two new features: (1) an AI Builder of the
+        Week crown badge gated behind a secret code, and (2) a book-opening
+        animation when a spine is clicked"
+
+  P12: "Update Project Documentation TXT and add Secret Code to the
+        documentation"
 
 Note: Before the above prompts, the core scaffold (bookshelf UI, add-book
 form, API, database, spine color system, pixel-art characters, shelf stats)
@@ -263,6 +299,33 @@ Iteration 9 — Mobile Responsiveness
   - Modals clipped off-screen on short viewports — added max-height + inner
     scroll to all three modals (book details, add book, edit book).
 
+Iteration 10 — Crown Badge (AI Builder of the Week)
+----------------------------------------------------
+  Added a secret-code-gated "AI Builder of the Week" badge system.
+  - New boolean column `is_badged` added to the database
+  - OpenAPI spec updated; codegen re-run to regenerate hooks and Zod schemas
+  - Add Book and Edit Book forms gained a "Special Recognition" section:
+    entering the code "Goldcrown" reveals a toggleable crown badge option
+  - Badged book spines display a 👑 emoji with a golden glow above the
+    pixel-art character
+  - Backend PATCH route wired to accept and persist `isBadged`
+  Notable bug: Drizzle ORM silently drops boolean fields when the updates
+  object is typed as `Record<string, unknown>`. Fixed by switching to
+  `Partial<typeof booksTable.$inferInsert>` so Drizzle's column mapper
+  correctly resolves all field names including booleans.
+
+Iteration 11 — Book Opening Animation
+--------------------------------------
+  Replaced the simple declarative `whileHover`/`whileTap` Framer Motion
+  approach with a sequenced `useAnimation`-controlled animation on click:
+    Step 1 — Book lifts forward (y: -48, scale: 1.05)
+    Step 2 — Covers spread open (scaleX: 1.38) with a spring-like easing
+    Step 3 — Cream parchment overlay flashes (simulates exposed pages)
+    Step 4 — Covers snap shut slightly; modal fires; book settles to idle
+  Hover still uses the same controls for a smooth spring lift, managed
+  manually via onHoverStart/onHoverEnd and an `isAnimating` guard flag
+  that prevents hover from interrupting a click sequence mid-flight.
+
 ================================================================================
   7. LEARNINGS AND OBSERVATIONS FROM THE WORKFLOW
 ================================================================================
@@ -284,8 +347,8 @@ Iteration 9 — Mobile Responsiveness
 
 3. Database changes cascade through the stack
    ---------------------------------------------
-   Adding the "week" field touched six separate layers: DB schema, migration,
-   OpenAPI spec, codegen, backend route handler, and two frontend forms. In a
+   Adding any new field touches six separate layers: DB schema, migration,
+   OpenAPI spec, codegen, backend route handler, and frontend forms. In a
    vibe-coding workflow this cascade is fast but easy to miss a layer — the
    codegen step (re-generating React Query hooks and Zod schemas from the spec)
    is the most commonly forgotten and causes cryptic TypeScript errors if skipped.
@@ -329,6 +392,42 @@ Iteration 9 — Mobile Responsiveness
    iteration was visually correct — and when to stop iterating — still
    required human aesthetic review. The workflow is best thought of as
    "generate → review → refine" rather than "generate → ship".
+
+9. ORM type safety matters even for dynamic updates
+   ---------------------------------------------------
+   Using a loosely-typed `Record<string, unknown>` as the update payload
+   for Drizzle's `.set()` caused a boolean column (`is_badged`) to be
+   silently ignored — no error thrown, no warning, value just not written.
+   Switching to a typed `Partial<InferInsertModel>` resolved it immediately.
+   Lesson: always use the ORM's own insert/update types rather than plain
+   JS objects, even when building partial updates dynamically.
+
+10. Secret-code gates are simple but effective access control
+    -----------------------------------------------------------
+    Gating a privileged action (assigning the crown badge) behind a shared
+    secret code — without any auth system — is a pragmatic choice for a
+    small, trusted cohort. The code never leaves the form UI (it is not
+    submitted to the API; only the resulting boolean is stored). The
+    tradeoff is that the code can be shared accidentally, so it should be
+    changed between cohort cycles if re-used.
+
+================================================================================
+  8. SECRET CODES AND ADMIN REFERENCE
+================================================================================
+
+  AI Builder of the Week Badge
+  -----------------------------
+  Purpose : Marks a project as the cohort's AI Builder of the Week.
+            Displays a 👑 golden crown above the book spine.
+  Code    : Goldcrown
+  Notes   : Case-sensitive. Enter in the "Special Recognition" section of
+            the Add Book or Edit Book form. The code is not stored in the
+            database — only the resulting badge status (true/false) is saved.
+            To remove a badge, open Edit Book, enter the code, and toggle
+            the crown off before saving.
+
+  IMPORTANT: Share this code only with cohort leads / organisers.
+             Change it between cohort cycles if the shelf is reused.
 
 ================================================================================
   END OF DOCUMENTATION
