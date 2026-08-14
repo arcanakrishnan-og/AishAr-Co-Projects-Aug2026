@@ -209,29 +209,23 @@ export function BookSpine({ book, onClick }: BookSpineProps) {
       {/* Details/Decorations */}
       <div className="w-full flex-1 flex flex-col items-center justify-between z-10 text-white/90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
         
-        {/* Top: Initials above gold bars, then character */}
+        {/* Top: character above gold bars */}
         <div className="flex flex-col items-center gap-1 w-full">
-          {/* Initials above the gold bars */}
-          <div className="font-serif text-xs leading-none font-bold tracking-widest flex flex-col items-center opacity-90 mb-1">
-            <span>{firstInitial}</span>
-            <span>{lastInitial}</span>
-          </div>
-
-          {/* Gold bars */}
-          <div className="w-full flex flex-col gap-[2px]">
-            <div className="h-[2px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
-            <div className="h-[4px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
-          </div>
-
-          {/* Mario character below gold bars */}
+          {/* Mario character above gold bars */}
           <div 
-            className="w-[30px] h-[42px] relative mt-2"
+            className="w-[30px] h-[42px] relative mb-1"
             style={{ imageRendering: "pixelated" }}
           >
             <div 
               className="absolute top-0 left-0 w-[3px] h-[3px]"
               style={{ boxShadow: getPixelArt(book.id % 8) }}
             />
+          </div>
+
+          {/* Gold bars */}
+          <div className="w-full flex flex-col gap-[2px]">
+            <div className="h-[2px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
+            <div className="h-[4px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
           </div>
         </div>
 
