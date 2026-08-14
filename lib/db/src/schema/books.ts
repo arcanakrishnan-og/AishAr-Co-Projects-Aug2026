@@ -29,6 +29,7 @@ export const booksTable = pgTable("books", {
   liveLink: text("live_link"),
   githubLink: text("github_link").notNull(),
   email: text("email"),
+  description: text("description"),
   spineColor: text("spine_color").notNull(),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });

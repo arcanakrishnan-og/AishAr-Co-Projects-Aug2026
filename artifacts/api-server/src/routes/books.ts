@@ -51,7 +51,7 @@ router.post("/books", async (req, res): Promise<void> => {
     return;
   }
 
-  const { firstName, lastName, projectName, liveLink, githubLink, email } =
+  const { firstName, lastName, projectName, liveLink, githubLink, email, description } =
     parsed.data;
 
   const [book] = await db
@@ -63,6 +63,7 @@ router.post("/books", async (req, res): Promise<void> => {
       liveLink: liveLink ?? null,
       githubLink,
       email: email ?? null,
+      description: description ?? null,
       spineColor: randomSpineColor(),
     })
     .returning();

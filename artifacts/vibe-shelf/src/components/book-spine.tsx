@@ -2,6 +2,176 @@ import { motion } from "framer-motion";
 import type { Book } from "@workspace/api-client-react";
 import { cn } from "@/lib/utils";
 
+const getPixelArt = (type: number) => {
+  let layout: string[] = [];
+  let colors: Record<string, string> = {};
+
+  switch (type) {
+    case 0:
+      layout = [
+        "   RRRR   ",
+        "  RRRRRRR ",
+        "  OOYYYKO ",
+        " OYOYYYKOY",
+        " OYOOYYYOY",
+        " OOOYYYY  ",
+        "   YYYYY  ",
+        "  RRBRR   ",
+        " RRRBRRR  ",
+        "RRRRBRRRR ",
+        "YYRBYBRYY ",
+        "YYYBBBYYY ",
+        "YYBBBBBBYY",
+        "  OO OO   "
+      ];
+      colors = { R: '#E52521', B: '#0043A1', O: '#8B4513', Y: '#FFCC99', K: '#000000' };
+      break;
+    case 1:
+      layout = [
+        "          ",
+        "   RRRR   ",
+        "  RWWWRR  ",
+        " RRWWWRRR ",
+        " RRRRRWWR ",
+        " RRRRRWWR ",
+        "  RRRRRR  ",
+        "   YYYY   ",
+        "  YYKKY   ",
+        "  YYYYY   ",
+        "  YYYYY   ",
+        "   YYY    ",
+        "          ",
+        "          "
+      ];
+      colors = { R: '#E52521', W: '#FFFFFF', Y: '#FFCC99', K: '#000000' };
+      break;
+    case 2:
+      layout = [
+        "          ",
+        "    YY    ",
+        "   YYYY   ",
+        "   YYYY   ",
+        "YYYYYYYYYY",
+        " YYYYYYYY ",
+        "  YKYKYY  ",
+        "  YKYKYY  ",
+        "  YYYYYY  ",
+        "  YYYYYY  ",
+        " YYY  YYY ",
+        " YY    YY ",
+        "          ",
+        "          "
+      ];
+      colors = { Y: '#FFD700', K: '#000000' };
+      break;
+    case 3:
+      layout = [
+        "          ",
+        "   YYYY   ",
+        "  YOOOOY  ",
+        " YOY  YOY ",
+        " YOY YYOY ",
+        " YOY YYOY ",
+        " YOY YYOY ",
+        " YOY YYOY ",
+        " YOY  YOY ",
+        "  YOOOOY  ",
+        "   YYYY   ",
+        "          ",
+        "          "
+      ];
+      colors = { Y: '#FFD700', O: '#B8860B' };
+      break;
+    case 4:
+      layout = [
+        "          ",
+        "          ",
+        "   OOOO   ",
+        "  OOOOOO  ",
+        " OOKKOOKO ",
+        " OKWWKOWK ",
+        " OKKWKOWK ",
+        " OOOOOOOO ",
+        "  OOOOOO  ",
+        "   YYYY   ",
+        "  KKYYKK  ",
+        " KKKYYKKK ",
+        " KK    KK ",
+        "          "
+      ];
+      colors = { O: '#8B4513', K: '#000000', W: '#FFFFFF', Y: '#FFCC99' };
+      break;
+    case 5:
+      layout = [
+        "          ",
+        "          ",
+        "   GGGG   ",
+        "  GKKKKG  ",
+        " GKGWWGKG ",
+        " GKGWWGKG ",
+        " GKGWWGKG ",
+        " GKGWWGKG ",
+        " GKGWWGKG ",
+        "  GKKKKG  ",
+        "   GGGG   ",
+        "   WWWW   ",
+        "          ",
+        "          "
+      ];
+      colors = { G: '#00AA00', K: '#000000', W: '#FFFFFF' };
+      break;
+    case 6:
+      layout = [
+        "          ",
+        "   RRRR   ",
+        "  ROOOOR  ",
+        "  ROWWOR  ",
+        "  ROWWOR  ",
+        "  ROOOOR  ",
+        "   RRRR   ",
+        "    GG    ",
+        "   GGGG   ",
+        " G  GG  G ",
+        " GGGGGGGG ",
+        "  GGGGGG  ",
+        "    GG    ",
+        "          "
+      ];
+      colors = { R: '#E52521', O: '#FF8C00', W: '#FFFFFF', G: '#00AA00' };
+      break;
+    case 7:
+      layout = [
+        "          ",
+        "   GGGG   ",
+        "  GWWWGG  ",
+        " GGWWWGGG ",
+        " GGGGGWWG ",
+        " GGGGGWWG ",
+        "  GGGGGG  ",
+        "   YYYY   ",
+        "  YYKKY   ",
+        "  YYYYY   ",
+        "  YYYYY   ",
+        "   YYY    ",
+        "          ",
+        "          "
+      ];
+      colors = { G: '#00AA00', W: '#FFFFFF', Y: '#FFCC99', K: '#000000' };
+      break;
+  }
+
+  const shadows = [];
+  for (let r = 0; r < 14; r++) {
+    for (let c = 0; c < 10; c++) {
+      const char = layout[r]?.[c] || ' ';
+      if (char !== ' ' && colors[char]) {
+        shadows.push(`${c * 4}px ${r * 4}px 0 ${colors[char]}`);
+      }
+    }
+  }
+  return shadows.join(', ');
+};
+
 interface BookSpineProps {
   book: Book;
   onClick: () => void;
@@ -39,15 +209,25 @@ export function BookSpine({ book, onClick }: BookSpineProps) {
       {/* Details/Decorations */}
       <div className="w-full flex-1 flex flex-col items-center justify-between z-10 text-white/90 drop-shadow-[0_1px_1px_rgba(0,0,0,0.8)]">
         
-        {/* Top decorations & Initials */}
-        <div className="flex flex-col items-center gap-2">
+        {/* Top decorations & Character & Initials */}
+        <div className="flex flex-col items-center gap-3 w-full">
           {/* Gold bars */}
           <div className="w-full flex flex-col gap-[2px]">
             <div className="h-[2px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
             <div className="h-[4px] w-full bg-gradient-to-r from-amber-300/30 via-amber-200/60 to-amber-300/30"></div>
           </div>
           
-          <div className="font-serif text-lg leading-none font-bold tracking-widest mt-2 flex flex-col items-center">
+          <div 
+            className="w-[40px] h-[56px] relative mt-2"
+            style={{ imageRendering: "pixelated" }}
+          >
+            <div 
+              className="absolute top-0 left-0 w-[4px] h-[4px]"
+              style={{ boxShadow: getPixelArt(book.id % 8) }}
+            />
+          </div>
+
+          <div className="font-serif text-xs leading-none font-bold tracking-widest flex flex-col items-center opacity-80 mt-1">
             <span>{firstInitial}</span>
             <span>{lastInitial}</span>
           </div>

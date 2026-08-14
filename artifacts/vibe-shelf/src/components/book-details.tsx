@@ -75,6 +75,15 @@ export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
           </DialogHeader>
 
           <div className="space-y-6">
+            {book.description && (
+              <>
+                <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-900/20 to-transparent" />
+                <p className="font-serif italic text-amber-900/80 leading-relaxed px-2 text-center text-[15px]">
+                  {book.description}
+                </p>
+              </>
+            )}
+
             <div className="h-px w-full bg-gradient-to-r from-transparent via-amber-900/20 to-transparent" />
             
             <div className="flex flex-col gap-4 font-sans">

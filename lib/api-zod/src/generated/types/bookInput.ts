@@ -17,4 +17,5 @@ export interface BookInput {
   /** @minLength 1 */
   githubLink: string;
   email?: string;
+  description?: string;
 }

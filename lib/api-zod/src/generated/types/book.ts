@@ -16,6 +16,11 @@ export interface Book {
   githubLink: string;
   /** @nullable */
   email?: string | null;
+  /**
+     * Short description of the project
+     * @nullable
+     */
+  description?: string | null;
   /** Hex color code for the book spine */
   spineColor: string;
   createdAt: Date;

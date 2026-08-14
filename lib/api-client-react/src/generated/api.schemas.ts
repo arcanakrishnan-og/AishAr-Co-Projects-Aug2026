@@ -19,6 +19,11 @@ export interface Book {
   githubLink: string;
   /** @nullable */
   email?: string | null;
+  /**
+     * Short description of the project
+     * @nullable
+     */
+  description?: string | null;
   /** Hex color code for the book spine */
   spineColor: string;
   createdAt: string;
@@ -35,6 +40,7 @@ export interface BookInput {
   /** @minLength 1 */
   githubLink: string;
   email?: string;
+  description?: string;
 }
 
 export interface ShelfStats {

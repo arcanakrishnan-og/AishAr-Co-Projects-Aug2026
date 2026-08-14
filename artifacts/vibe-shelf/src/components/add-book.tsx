@@ -4,6 +4,7 @@ import { z } from "zod";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useCreateBook } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,6 +16,7 @@ const addBookSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   projectName: z.string().min(1, "Project name is required"),
+  description: z.union([z.string(), z.literal(""), z.undefined()]),
   githubLink: z.string().url("Must be a valid URL").min(1, "GitHub link is required"),
   liveLink: z.union([z.string().url("Must be a valid URL"), z.literal(""), z.undefined()]),
   email: z.union([z.string().email("Must be a valid email"), z.literal(""), z.undefined()]),
@@ -38,6 +40,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
       firstName: "",
       lastName: "",
       projectName: "",
+      description: "",
       githubLink: "",
       liveLink: "",
       email: "",
@@ -48,6 +51,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
     // Convert empty strings to undefined to match API optional fields
     const payload = {
       ...data,
+      description: data.description || undefined,
       liveLink: data.liveLink || undefined,
       email: data.email || undefined,
     };
@@ -135,6 +139,20 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                   <FormLabel className="text-amber-950">Project Name</FormLabel>
                   <FormControl>
                     <Input placeholder="The Analytical Engine" className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
+                  </FormControl>
+                  <FormMessage className="text-red-800" />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-amber-950">Description (Optional)</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="A brief description of this project..." className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50 resize-none h-20" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-800" />
                 </FormItem>

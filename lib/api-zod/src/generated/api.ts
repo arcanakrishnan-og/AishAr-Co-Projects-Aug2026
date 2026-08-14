@@ -28,6 +28,7 @@ export const ListBooksResponseItem = zod.object({
   "liveLink": zod.string().nullish(),
   "githubLink": zod.string(),
   "email": zod.string().nullish(),
+  "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "createdAt": zod.coerce.date()
 })
@@ -49,7 +50,8 @@ export const CreateBookBody = zod.object({
   "projectName": zod.string().min(1),
   "liveLink": zod.string().optional(),
   "githubLink": zod.string().min(1),
-  "email": zod.string().optional()
+  "email": zod.string().optional(),
+  "description": zod.string().optional()
 })
 
 export const CreateBookResponse = zod.object({
@@ -60,6 +62,7 @@ export const CreateBookResponse = zod.object({
   "liveLink": zod.string().nullish(),
   "githubLink": zod.string(),
   "email": zod.string().nullish(),
+  "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "createdAt": zod.coerce.date()
 })
@@ -80,6 +83,7 @@ export const GetBookResponse = zod.object({
   "liveLink": zod.string().nullish(),
   "githubLink": zod.string(),
   "email": zod.string().nullish(),
+  "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "createdAt": zod.coerce.date()
 })
@@ -108,6 +112,7 @@ export const GetShelfStatsResponse = zod.object({
   "liveLink": zod.string().nullish(),
   "githubLink": zod.string(),
   "email": zod.string().nullish(),
+  "description": zod.string().nullish().describe('Short description of the project'),
   "spineColor": zod.string().describe('Hex color code for the book spine'),
   "createdAt": zod.coerce.date()
 }))
