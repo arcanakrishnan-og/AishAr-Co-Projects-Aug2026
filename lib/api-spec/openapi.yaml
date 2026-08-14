@@ -3,13 +3,15 @@ info:
   # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Vibe Shelf API — a community bookshelf of vibe-coded GitHub projects
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: books
+    description: Book (project) operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,102 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /books:
+    get:
+      operationId: listBooks
+      tags: [books]
+      summary: List all books on the shelf
+      responses:
+        "200":
+          description: List of books
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Book"
+    post:
+      operationId: createBook
+      tags: [books]
+      summary: Add a new book to the shelf
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BookInput"
+      responses:
+        "201":
+          description: Book created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /books/{id}:
+    get:
+      operationId: getBook
+      tags: [books]
+      summary: Get a single book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "200":
+          description: Book found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Book"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteBook
+      tags: [books]
+      summary: Remove a book from the shelf
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /books/stats:
+    get:
+      operationId: getShelfStats
+      tags: [books]
+      summary: Get shelf statistics (total books, recent additions)
+      responses:
+        "200":
+          description: Shelf stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShelfStats"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +132,80 @@ components:
       required:
         - status
 
+    Book:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - projectName
+        - githubLink
+        - spineColor
+        - createdAt
+      properties:
+        id:
+          type: number
+        firstName:
+          type: string
+        lastName:
+          type: string
+        projectName:
+          type: string
+        liveLink:
+          type: ["string", "null"]
+        githubLink:
+          type: string
+        email:
+          type: ["string", "null"]
+        spineColor:
+          type: string
+          description: Hex color code for the book spine
+        createdAt:
+          type: string
+          format: date-time
+
+    BookInput:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - projectName
+        - githubLink
+      properties:
+        firstName:
+          type: string
+          minLength: 1
+        lastName:
+          type: string
+          minLength: 1
+        projectName:
+          type: string
+          minLength: 1
+        liveLink:
+          type: string
+        githubLink:
+          type: string
+          minLength: 1
+        email:
+          type: string
+
+    ShelfStats:
+      type: object
+      required:
+        - totalBooks
+        - recentBooks
+      properties:
+        totalBooks:
+          type: number
+        recentBooks:
+          type: array
+          items:
+            $ref: "#/components/schemas/Book"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string

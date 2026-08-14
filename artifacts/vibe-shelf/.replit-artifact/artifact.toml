@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "Vibe Shelf"
+description = "A vintage library bookshelf web app that displays a collection of GitHub vibe-coded project links as books. Each book spine shows the owner's name initials, and pulling a book open reveals the project name, live demo link, GitHub link, and optional collaboration email. Users can add their own books to the community shelf."
+version = "1.0.0"
+id = "artifacts/vibe-shelf"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 20572
+
+[services.development]
+run = "pnpm --filter @workspace/vibe-shelf run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/vibe-shelf", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/vibe-shelf/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "20572"
+BASE_PATH = "/"

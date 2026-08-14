@@ -5,9 +5,6 @@
  * Vibe Shelf API — a community bookshelf of vibe-coded GitHub projects
  * OpenAPI spec version: 0.1.0
  */
-export interface HealthStatus {
-  status: string;
-}
 
 export interface Book {
   id: number;
@@ -21,28 +18,5 @@ export interface Book {
   email?: string | null;
   /** Hex color code for the book spine */
   spineColor: string;
-  createdAt: string;
+  createdAt: Date;
 }
-
-export interface BookInput {
-  /** @minLength 1 */
-  firstName: string;
-  /** @minLength 1 */
-  lastName: string;
-  /** @minLength 1 */
-  projectName: string;
-  liveLink?: string;
-  /** @minLength 1 */
-  githubLink: string;
-  email?: string;
-}
-
-export interface ShelfStats {
-  totalBooks: number;
-  recentBooks: Book[];
-}
-
-export interface ErrorResponse {
-  error: string;
-}
-
