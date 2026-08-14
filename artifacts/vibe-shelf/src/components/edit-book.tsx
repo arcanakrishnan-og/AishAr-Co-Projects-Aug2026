@@ -8,85 +8,85 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreateBook } from "@workspace/api-client-react";
+import { useUpdateBook, getListBooksQueryKey, getGetBookQueryKey, getGetShelfStatsQueryKey } from "@workspace/api-client-react";
+import type { Book } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
-import { getListBooksQueryKey, getGetShelfStatsQueryKey } from "@workspace/api-client-react";
 import { useToast } from "@/hooks/use-toast";
-import { LibraryBig, Loader2, Lock, Crown } from "lucide-react";
+import { Pencil, Loader2, Lock, Crown } from "lucide-react";
 
 const WEEKS = [1, 2, 3, 4, 5, 6] as const;
 const BADGE_CODE = "Goldcrown";
 
-const addBookSchema = z.object({
+const editBookSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   projectName: z.string().min(1, "Project name is required"),
-  description: z.union([z.string(), z.literal(""), z.undefined()]),
   githubLink: z.string().url("Must be a valid URL").min(1, "GitHub link is required"),
   liveLink: z.union([z.string().url("Must be a valid URL"), z.literal(""), z.undefined()]),
   email: z.union([z.string().email("Must be a valid email"), z.literal(""), z.undefined()]),
+  description: z.union([z.string(), z.literal(""), z.undefined()]),
   week: z.union([z.number().min(1).max(6), z.undefined()]),
   isBadged: z.boolean().default(false),
 });
 
-type AddBookValues = z.infer<typeof addBookSchema>;
+type EditBookValues = z.infer<typeof editBookSchema>;
 
-interface AddBookModalProps {
+interface EditBookModalProps {
+  book: Book;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
+export function EditBookModal({ book, isOpen, onClose }: EditBookModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const createBook = useCreateBook();
+  const updateBook = useUpdateBook();
   const [secretCode, setSecretCode] = useState("");
 
   const codeUnlocked = secretCode === BADGE_CODE;
 
-  const form = useForm<AddBookValues>({
-    resolver: zodResolver(addBookSchema),
+  const form = useForm<EditBookValues>({
+    resolver: zodResolver(editBookSchema),
     defaultValues: {
-      firstName: "",
-      lastName: "",
-      projectName: "",
-      description: "",
-      githubLink: "",
-      liveLink: "",
-      email: "",
-      week: undefined,
-      isBadged: false,
+      firstName: book.firstName,
+      lastName: book.lastName,
+      projectName: book.projectName,
+      githubLink: book.githubLink,
+      liveLink: book.liveLink ?? "",
+      email: book.email ?? "",
+      description: book.description ?? "",
+      week: book.week ?? undefined,
+      isBadged: book.isBadged ?? false,
     },
   });
 
-  const onSubmit = (data: AddBookValues) => {
+  const onSubmit = (data: EditBookValues) => {
     const payload = {
       ...data,
-      description: data.description || undefined,
       liveLink: data.liveLink || undefined,
       email: data.email || undefined,
+      description: data.description || undefined,
       week: data.week ?? undefined,
-      isBadged: codeUnlocked ? data.isBadged : false,
+      isBadged: codeUnlocked ? data.isBadged : book.isBadged,
     };
 
-    createBook.mutate(
-      { data: payload },
+    updateBook.mutate(
+      { id: book.id, data: payload },
       {
         onSuccess: () => {
           queryClient.invalidateQueries({ queryKey: getListBooksQueryKey() });
+          queryClient.invalidateQueries({ queryKey: getGetBookQueryKey(book.id) });
           queryClient.invalidateQueries({ queryKey: getGetShelfStatsQueryKey() });
           toast({
-            title: "Book placed on shelf",
-            description: "Your project has been successfully added to the library.",
+            title: "Book updated",
+            description: "Your changes have been saved to the shelf.",
           });
-          form.reset();
-          setSecretCode("");
           onClose();
         },
         onError: () => {
           toast({
             title: "Error",
-            description: "Could not add your book. Please try again.",
+            description: "Could not update the book. Please try again.",
             variant: "destructive",
           });
         },
@@ -95,23 +95,17 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => {
-      if (!open) {
-        form.reset();
-        setSecretCode("");
-        onClose();
-      }
-    }}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if (!open) { setSecretCode(""); onClose(); } }}>
       <DialogContent className="sm:max-w-[500px] parchment-texture border-amber-900/20 shadow-2xl bg-card text-card-foreground max-h-[92vh] flex flex-col overflow-hidden">
         <DialogHeader className="mb-4">
           <div className="mx-auto w-12 h-12 bg-amber-900/10 rounded-full flex items-center justify-center mb-4 text-amber-900">
-            <LibraryBig size={24} />
+            <Pencil size={24} />
           </div>
           <DialogTitle className="text-2xl font-serif text-center text-amber-950">
-            Add Your Book
+            Edit Book
           </DialogTitle>
           <DialogDescription className="text-center font-sans text-amber-900/70">
-            Immortalise your vibe-coded project on the library shelves.
+            Update the details for "{book.projectName}".
           </DialogDescription>
         </DialogHeader>
 
@@ -125,7 +119,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                   <FormItem>
                     <FormLabel className="text-amber-950">First Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Ada" className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
+                      <Input className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
                     </FormControl>
                     <FormMessage className="text-red-800" />
                   </FormItem>
@@ -138,7 +132,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                   <FormItem>
                     <FormLabel className="text-amber-950">Last Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Lovelace" className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
+                      <Input className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
                     </FormControl>
                     <FormMessage className="text-red-800" />
                   </FormItem>
@@ -153,7 +147,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                 <FormItem>
                   <FormLabel className="text-amber-950">Project Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="The Analytical Engine" className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
+                    <Input className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-800" />
                 </FormItem>
@@ -167,7 +161,12 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                 <FormItem>
                   <FormLabel className="text-amber-950">Description (Optional)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="A brief description of this project..." className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50 resize-none h-20" {...field} />
+                    <Textarea
+                      placeholder="A short description of your project..."
+                      className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50 resize-none"
+                      rows={3}
+                      {...field}
+                    />
                   </FormControl>
                   <FormMessage className="text-red-800" />
                 </FormItem>
@@ -207,7 +206,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                 <FormItem>
                   <FormLabel className="text-amber-950">GitHub URL</FormLabel>
                   <FormControl>
-                    <Input placeholder="https://github.com/..." className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
+                    <Input className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-800" />
                 </FormItem>
@@ -235,7 +234,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                 <FormItem>
                   <FormLabel className="text-amber-950">Collaboration Email (Optional)</FormLabel>
                   <FormControl>
-                    <Input placeholder="ada@example.com" type="email" className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
+                    <Input type="email" className="bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50" {...field} />
                   </FormControl>
                   <FormMessage className="text-red-800" />
                 </FormItem>
@@ -249,19 +248,24 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
                 <span>Special Recognition</span>
               </div>
 
+              {book.isBadged && !codeUnlocked && (
+                <div className="flex items-center gap-2 text-amber-700 text-sm font-sans bg-amber-100/60 rounded px-3 py-2">
+                  <span className="text-base">👑</span>
+                  <span>AI Builder of the Week badge is active. Enter code to change.</span>
+                </div>
+              )}
+
               <div className="flex items-center gap-2">
                 <Input
                   value={secretCode}
                   onChange={(e) => setSecretCode(e.target.value)}
-                  placeholder="Enter code to unlock..."
+                  placeholder="Enter code to unlock badge..."
                   className={`bg-white/50 border-amber-900/20 focus-visible:ring-amber-900/50 text-sm flex-1 ${
                     codeUnlocked ? "border-amber-500 ring-1 ring-amber-400" : ""
                   }`}
                   autoComplete="off"
                 />
-                {codeUnlocked && (
-                  <span className="text-amber-500 text-lg">👑</span>
-                )}
+                {codeUnlocked && <span className="text-amber-500 text-lg">👑</span>}
               </div>
 
               {codeUnlocked && (
@@ -300,19 +304,27 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
               )}
             </div>
 
-            <div className="pt-2">
+            <div className="pt-2 flex gap-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1 border-amber-900/30 text-amber-900 hover:bg-amber-900/10"
+                onClick={onClose}
+              >
+                Cancel
+              </Button>
               <Button
                 type="submit"
-                className="w-full font-serif text-lg tracking-wide bg-amber-800 hover:bg-amber-900 text-white"
-                disabled={createBook.isPending}
+                className="flex-1 font-serif text-lg tracking-wide bg-amber-800 hover:bg-amber-900 text-white"
+                disabled={updateBook.isPending}
               >
-                {createBook.isPending ? (
+                {updateBook.isPending ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Shelving...
+                    Saving...
                   </>
                 ) : (
-                  "Place on Shelf"
+                  "Save Changes"
                 )}
               </Button>
             </div>
