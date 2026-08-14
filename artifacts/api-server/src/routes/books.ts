@@ -92,7 +92,9 @@ router.patch("/books/:id", async (req, res): Promise<void> => {
   }
 
   // Build update object — only include defined fields
-  const updates: Record<string, unknown> = {};
+  // Must use Partial<InferInsertModel> so Drizzle correctly maps camelCase keys to columns
+  type BookUpdate = Partial<typeof booksTable.$inferInsert>;
+  const updates: BookUpdate = {};
   const d = parsed.data;
   if (d.firstName !== undefined) updates.firstName = d.firstName;
   if (d.lastName !== undefined) updates.lastName = d.lastName;
