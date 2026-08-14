@@ -16,6 +16,7 @@ export default function ShelfPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isFindOpen, setIsFindOpen] = useState(false);
   const [findQuery, setFindQuery] = useState("");
+  const [weekFilter, setWeekFilter] = useState<number | null>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   // Focus input when Find opens
@@ -38,16 +39,17 @@ export default function ShelfPage() {
 
   const query = findQuery.trim().toLowerCase();
   const filteredBooks = books
-    ? query
-      ? books.filter(
-          (b) =>
-            b.projectName.toLowerCase().includes(query) ||
-            b.firstName.toLowerCase().includes(query) ||
-            b.lastName.toLowerCase().includes(query) ||
-            `${b.firstName} ${b.lastName}`.toLowerCase().includes(query) ||
-            (b.description ?? "").toLowerCase().includes(query)
-        )
-      : books
+    ? books.filter((b) => {
+        const matchesQuery =
+          !query ||
+          b.projectName.toLowerCase().includes(query) ||
+          b.firstName.toLowerCase().includes(query) ||
+          b.lastName.toLowerCase().includes(query) ||
+          `${b.firstName} ${b.lastName}`.toLowerCase().includes(query) ||
+          (b.description ?? "").toLowerCase().includes(query);
+        const matchesWeek = weekFilter === null || b.week === weekFilter;
+        return matchesQuery && matchesWeek;
+      })
     : [];
 
   const matchCount = query ? filteredBooks.length : null;
@@ -94,6 +96,24 @@ export default function ShelfPage() {
           </Button>
         </div>
       </header>
+
+      {/* Week Filter Bar */}
+      <div className="relative z-10 w-full px-6 md:px-12 py-2 bg-background/80 border-b border-border flex items-center gap-2 flex-wrap">
+        <span className="text-xs text-muted-foreground uppercase tracking-wider font-sans mr-1">Week</span>
+        {[null, 1, 2, 3, 4, 5, 6].map((w) => (
+          <button
+            key={w ?? "all"}
+            onClick={() => setWeekFilter(w)}
+            className={`px-3 py-1 rounded-full text-xs font-sans transition-colors ${
+              weekFilter === w
+                ? "bg-amber-800 text-white"
+                : "bg-amber-900/10 text-amber-900 hover:bg-amber-900/20"
+            }`}
+          >
+            {w === null ? "All" : `Week ${w}`}
+          </button>
+        ))}
+      </div>
 
       {/* Find Bar */}
       <div
