@@ -93,7 +93,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
         onClose();
       }
     }}>
-      <DialogContent className="sm:max-w-[500px] parchment-texture border-amber-900/20 shadow-2xl bg-card text-card-foreground">
+      <DialogContent className="sm:max-w-[500px] parchment-texture border-amber-900/20 shadow-2xl bg-card text-card-foreground max-h-[92vh] flex flex-col overflow-hidden">
         <DialogHeader className="mb-4">
           <div className="mx-auto w-12 h-12 bg-amber-900/10 rounded-full flex items-center justify-center mb-4 text-amber-900">
             <LibraryBig size={24} />
@@ -107,7 +107,7 @@ export function AddBookModal({ isOpen, onClose }: AddBookModalProps) {
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 font-sans">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 font-sans overflow-y-auto flex-1 pr-1">
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}

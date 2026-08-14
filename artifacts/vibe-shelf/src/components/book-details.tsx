@@ -52,15 +52,15 @@ export function BookDetails({ book, isOpen, onClose }: BookDetailsProps) {
   return (
     <>
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md parchment-texture border-amber-900/20 shadow-2xl bg-card text-card-foreground p-0 overflow-hidden rounded-md">
+      <DialogContent className="sm:max-w-md parchment-texture border-amber-900/20 shadow-2xl bg-card text-card-foreground p-0 overflow-hidden rounded-md max-h-[90vh] flex flex-col">
         
         {/* Top colored binding matching the book spine */}
         <div 
-          className="h-3 w-full" 
+          className="h-3 w-full shrink-0" 
           style={{ backgroundColor: book.spineColor }}
         />
         
-        <div className="p-8">
+        <div className="p-5 sm:p-8 overflow-y-auto flex-1">
           <DialogHeader className="mb-8">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 text-amber-800/60 font-sans text-sm tracking-widest uppercase">
